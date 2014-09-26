@@ -110,13 +110,13 @@ var SampleApp = function() {
             var errorcode = 0;
             var errordetails = '';
 
-            var xml = '<?xml version="1.0"?>';
-            xml += '<response>';
-            xml += '<variables>';
-            xml += '<var name="out" expr="'+inp+'"/>';
-            xml += '</variables>';
-            xml += '<error code="'+errorcode+'" description="'+errordetails+'"/>';
-            xml += '</response>';
+            var xml = '<?xml version="1.0"?>'
+                + '<response>'
+                + '<variables>'
+                + '<var name="out" expr="'+inp+'"/>'
+                + '</variables>'
+                + '<error code="'+errorcode+'" description="'+errordetails+'"/>'
+                + '</response>';
 
             res.setHeader('Content-Type', 'text/xml');
             res.send(xml);
@@ -130,7 +130,7 @@ var SampleApp = function() {
      */
     self.initializeServer = function() {
         self.createRoutes();
-        self.app = express.createServer();
+        self.app = express();
 
         //  Add handlers for the app (from the routes).
         for (var r in self.routes) {
