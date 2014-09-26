@@ -30,7 +30,7 @@ var SampleApp = function() {
             //  allows us to run/test the app locally.
             console.warn('No OPENSHIFT_NODEJS_IP var, using 127.0.0.1');
             self.ipaddress = "127.0.0.1";
-        };
+        }
     };
 
 
@@ -62,10 +62,10 @@ var SampleApp = function() {
     self.terminator = function(sig){
         if (typeof sig === "string") {
            console.log('%s: Received %s - terminating sample app ...',
-                       Date(Date.now()), sig);
+                       new Date(Date.now()), sig);
            process.exit(1);
         }
-        console.log('%s: Node server stopped.', Date(Date.now()) );
+        console.log('%s: Node server stopped.', new Date(Date.now()) );
     };
 
 
@@ -107,9 +107,19 @@ var SampleApp = function() {
 
         self.routes['/ivrquery'] = function(req, res) {
             var inp = req.query.input;
-            res.setHeader('Content-Type', 'application/json');
-            var json = { response: inp, success: true };
-            res.send(json);
+            var errorcode = 0;
+            var errordetails = '';
+
+            var xml = '<?xml version="1.0"?>';
+            xml += '<response>';
+            xml += '<variables>';
+            xml += '<var name="out" expr="'+inp+'"/>';
+            xml += '</variables>';
+            xml += '<error code="'+errorcode+'" description="'+errordetails+'"/>';
+            xml += '</response>';
+
+            res.setHeader('Content-Type', 'text/xml');
+            res.send(xml);
         };
     };
 
@@ -149,7 +159,7 @@ var SampleApp = function() {
         //  Start the app on the specific interface (and port).
         self.app.listen(self.port, self.ipaddress, function() {
             console.log('%s: Node server started on %s:%d ...',
-                        Date(Date.now() ), self.ipaddress, self.port);
+                        new Date(Date.now() ), self.ipaddress, self.port);
         });
     };
 
