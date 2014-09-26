@@ -104,6 +104,12 @@ var SampleApp = function() {
             res.setHeader('Content-Type', 'text/html');
             res.send(self.cache_get('index.html') );
         };
+
+        self.routes['/ivrquery'] = function(req, res) {
+            res.setHeader('Content-Type', 'application/json');
+            var json = { success: true };
+            res.send(json);
+        };
     };
 
 
