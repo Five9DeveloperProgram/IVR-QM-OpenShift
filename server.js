@@ -106,8 +106,9 @@ var SampleApp = function() {
         };
 
         self.routes['/ivrquery'] = function(req, res) {
+            var inp = req.query.input;
             res.setHeader('Content-Type', 'application/json');
-            var json = { success: true };
+            var json = { response: inp, success: true };
             res.send(json);
         };
     };
