@@ -122,13 +122,21 @@ var AppClass = function() {
             var out_param1 = in_param1;
             var out_param2 = in_param2;
 
-            var json = {};
-            json.response = {};
-            json.response.variables = {};
-            json.response.variables.var = [];
-            json.response.variables.var.push({ name: 'param1', expr: out_param1 });
-            json.response.variables.var.push({ name: 'param2', expr: out_param2 });
-            json.response.error = { code: 0, description: '' };
+            var out = [];
+            out.push({ name: 'param1', expr: out_param1 });
+            out.push({ name: 'param2', expr: out_param2 });
+
+            var json = {
+                response: {
+                    variables: {
+                        var: out
+                    },
+                    error: {
+                        code: 0,
+                        description: ''
+                    }
+                }
+            };
 
             xml = '<?xml version="1.0"?>' + xml2js.toXml(json);
 
