@@ -1,21 +1,15 @@
 #!/bin/env node
-//  OpenShift sample Node application
+
 var express = require('express');
 var fs      = require('fs');
-
+var xml2js  = require('xml2json');
 
 /**
- *  Define the sample application.
+ *  Define the application class
  */
-var SampleApp = function() {
+var AppClass = function() {
 
-    //  Scope.
     var self = this;
-
-
-    /*  ================================================================  */
-    /*  Helper functions.                                                 */
-    /*  ================================================================  */
 
     /**
      *  Set up server IP address and port # using env variables/defaults.
@@ -95,34 +89,70 @@ var SampleApp = function() {
     self.createRoutes = function() {
         self.routes = { };
 
-        self.routes['/asciimo'] = function(req, res) {
-            var link = "http://i.imgur.com/kmbjB.png";
-            res.send("<html><body><img src='" + link + "'></body></html>");
-        };
-
         self.routes['/'] = function(req, res) {
             res.setHeader('Content-Type', 'text/html');
             res.send(self.cache_get('index.html') );
         };
 
-        self.routes['/ivrquery'] = function(req, res) {
-            var inp = req.query.input;
-            var errorcode = 0;
-            var errordetails = '';
-
-            var xml = '<?xml version="1.0"?>'
-                + '<response>'
-                + '<variables>'
-                + '<var name="out" expr="'+inp+'"/>'
-                + '</variables>'
-                + '<error code="'+errorcode+'" description="'+errordetails+'"/>'
-                + '</response>';
-
-            res.setHeader('Content-Type', 'text/xml');
-            res.send(xml);
-        };
+        // define ivr query handler route
+        self.routes['/ivrquery'] = ivrqueryHandler;
     };
 
+    /**
+     * Handle for ivr query module requests
+     *
+     * @param req The request object
+     * @param res The response object
+     */
+    function ivrqueryHandler (req, res) {
+
+        var xml;
+        try {
+            /*
+                Parse the input parameters. By default the query modules
+                uses param1, param2, param3, etc.
+             */
+            var in_param1 = req.query.param1;
+            var in_param2 = req.query.param2;
+
+            /*
+                Perform module processing, return results as
+                param1, param2, param3, etc.
+             */
+            var out_param1 = in_param1;
+            var out_param2 = in_param2;
+
+            var json = {};
+            json.response = {};
+            json.response.variables = [];
+            json.response.variables.push({ var: { name: 'param1', expr: out_param1 }});
+            json.response.variables.push({ var: { name: 'param2', expr: out_param2 }});
+            json.response.error = { code: 0, description: '' };
+
+            xml = '<?xml version="1.0"?>' + xml2js.toXml(json);
+
+//            xml = '<?xml version="1.0"?>'
+//                + '<response>'
+//                + '<variables>'
+//                + '<var name="param1" expr="' + out_param1 + '"/>'
+//                + '<var name="param2" expr="' + out_param2 + '"/>'
+//                + '</variables>'
+//                + '<error code="0" description=""/>'
+//                + '</response>';
+
+        } catch (e) {
+            // catch exception, return as error
+            xml = '<?xml version="1.0"?>'
+                + '<response>'
+                + '<variables>'
+                + '</variables>'
+                + '<error code="-1" description="' + e.message + '"/>'
+                + '</response>';
+        }
+
+        res.setHeader('Content-Type', 'text/xml');
+        res.send(xml);
+    }
 
     /**
      *  Initialize the server (express) and create the routes and register
@@ -163,14 +193,12 @@ var SampleApp = function() {
         });
     };
 
-};   /*  Sample Application.  */
-
-
+};
 
 /**
  *  main():  Main code.
  */
-var zapp = new SampleApp();
-zapp.initialize();
-zapp.start();
+var mainapp = new AppClass();
+mainapp.initialize();
+mainapp.start();
 
