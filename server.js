@@ -131,15 +131,6 @@ var AppClass = function() {
 
             xml = '<?xml version="1.0"?>' + xml2js.toXml(json);
 
-//            xml = '<?xml version="1.0"?>'
-//                + '<response>'
-//                + '<variables>'
-//                + '<var name="param1" expr="' + out_param1 + '"/>'
-//                + '<var name="param2" expr="' + out_param2 + '"/>'
-//                + '</variables>'
-//                + '<error code="0" description=""/>'
-//                + '</response>';
-
         } catch (e) {
             // catch exception, return as error
             xml = '<?xml version="1.0"?>'
