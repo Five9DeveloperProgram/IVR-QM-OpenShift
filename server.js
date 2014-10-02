@@ -124,9 +124,10 @@ var AppClass = function() {
 
             var json = {};
             json.response = {};
-            json.response.variables = [];
-            json.response.variables.push({ var: { name: 'param1', expr: out_param1 }});
-            json.response.variables.push({ var: { name: 'param2', expr: out_param2 }});
+            json.response.variables = {};
+            json.response.variables.var = [];
+            json.response.variables.var.push({ name: 'param1', expr: out_param1 });
+            json.response.variables.var.push({ name: 'param2', expr: out_param2 });
             json.response.error = { code: 0, description: '' };
 
             xml = '<?xml version="1.0"?>' + xml2js.toXml(json);
