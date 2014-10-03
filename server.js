@@ -52,7 +52,7 @@ var IvrQueryServer = function() {
      */
     self.terminator = function(sig){
         if (typeof sig === "string") {
-           console.log('%s: Received %s - terminating sample app ...',
+           console.log('%s: Received %s - terminating ...',
                        new Date(Date.now()), sig);
            process.exit(1);
         }
@@ -103,27 +103,90 @@ var IvrQueryServer = function() {
     function ivrqueryHandler (req, res) {
 
         var xml;
-        try {
+        try
+        {
+            /*
+                Check access token to prevent un-authorized access
+                to the ivrquery service. Token can be included
+                in header or query string.
+             */
+            var token = req.get('token') || req.query.token;
+            if (token != 'secret-token') { // TODO replace with production token
+                res.status(401).send('401 Unauthorized');
+                return;
+            }
+
+            // Begin module processing
+
             /*
                 Parse input parameters passed in as param1, param2, param3, etc.
              */
             var in_param1 = req.query.param1;
             var in_param2 = req.query.param2;
             var in_param3 = req.query.param3;
-
-            // Begin module processing
-
-            var out_param1 = in_param1;
-            var out_param2 = in_param2;
-            var out_param3 = in_param3;
-
-            // End module processing
+            var in_param4 = req.query.param4;
 
             /*
-                Set return values to array. Results are returned in
-                order as: param1, param2, param3, etc.
+             Set return values to out_variables array. Results are returned
+             to the query module in order as: param1, param2, param3, etc.
              */
-            var out_variables = [ out_param1, out_param2, out_param3 ];
+            var out_variables = [ ];
+
+            if (!!in_param1 && (in_param1.indexOf('string.') == 0)
+                && !!in_param2) {
+
+                // string functions
+                //  in_param1: function name
+                //  in_param2: input string
+                //  in_param3: 1st function parameter
+                //  in_param4: 2nd function parameter
+
+                switch (in_param1) {
+                    case 'string.left':
+                    {
+                        if (!isNaN(in_param3)) {
+                            out_variables.push(in_param2.substr(0, in_param3));
+                        }
+                        break;
+                    }
+
+                    case 'string.right':
+                    {
+                        if (!isNaN(in_param3)) {
+                            out_variables.push(in_param2.substr(-in_param3));
+                        }
+                        break;
+                    }
+
+                    case 'string.mid':
+                    {
+                        if (!isNaN(in_param3) && !isNaN(in_param4)) {
+                            out_variables.push(in_param2.substr(in_param3-1, in_param4));
+                        }
+                        break;
+                    }
+
+                    case 'string.find':
+                    {
+                        if (!!in_param3) {
+                            out_variables.push(in_param2.indexOf(in_param3)+1);
+                        }
+                        break;
+                    }
+
+                    case 'string.split':
+                    {
+                        if (!!in_param3) {
+                            var parts = in_param2.split(in_param3);
+                            out_variables.push(parts.length);
+                            out_variables = out_variables.concat(parts);
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // End module processing
 
             var index = 0;
             var out_array = [];
