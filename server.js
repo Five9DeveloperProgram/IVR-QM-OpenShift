@@ -7,7 +7,7 @@ var xml2js  = require('xml2json');
 /**
  *  Define the application class
  */
-var AppClass = function() {
+var IvrQueryServer = function() {
 
     var self = this;
 
@@ -27,7 +27,6 @@ var AppClass = function() {
         }
     };
 
-
     /**
      *  Populate the cache.
      */
@@ -40,13 +39,11 @@ var AppClass = function() {
         self.zcache['index.html'] = fs.readFileSync('./index.html');
     };
 
-
     /**
      *  Retrieve entry (content) from cache.
      *  @param {string} key  Key identifying content to retrieve from cache.
      */
     self.cache_get = function(key) { return self.zcache[key]; };
-
 
     /**
      *  terminator === the termination handler
@@ -61,7 +58,6 @@ var AppClass = function() {
         }
         console.log('%s: Node server stopped.', new Date(Date.now()) );
     };
-
 
     /**
      *  Setup termination handlers (for exit and a list of signals).
@@ -78,11 +74,6 @@ var AppClass = function() {
         });
     };
 
-
-    /*  ================================================================  */
-    /*  App server functions (main app logic here).                       */
-    /*  ================================================================  */
-
     /**
      *  Create the routing table entries + handlers for the application.
      */
@@ -94,9 +85,14 @@ var AppClass = function() {
             res.send(self.cache_get('index.html') );
         };
 
-        // define ivr query handler route
+        // ivr query handler route
         self.routes['/ivrquery'] = ivrqueryHandler;
     };
+
+
+    /*  ================================================================  */
+    /*  App server functions (main app logic here).                       */
+    /*  ================================================================  */
 
     /**
      * Handle for ivr query module requests
@@ -109,49 +105,74 @@ var AppClass = function() {
         var xml;
         try {
             /*
-                Parse the input parameters. By default the query modules
-                uses param1, param2, param3, etc.
+                Parse input parameters passed in as param1, param2, param3, etc.
              */
             var in_param1 = req.query.param1;
             var in_param2 = req.query.param2;
+            var in_param3 = req.query.param3;
 
-            /*
-                Perform module processing, return results as
-                param1, param2, param3, etc.
-             */
+            // Begin module processing
+
             var out_param1 = in_param1;
             var out_param2 = in_param2;
+            var out_param3 = in_param3;
 
-            var out = [];
-            out.push({ name: 'param1', expr: out_param1 });
-            out.push({ name: 'param2', expr: out_param2 });
+            // End module processing
 
-            var json = {
-                response: {
-                    variables: {
-                        var: out
-                    },
-                    error: {
-                        code: 0,
-                        description: ''
-                    }
-                }
-            };
+            /*
+                Set return values to array. Results are returned in
+                order as: param1, param2, param3, etc.
+             */
+            var out_variables = [ out_param1, out_param2, out_param3 ];
+
+            var index = 0;
+            var out_array = [];
+            for (var i in out_variables) {
+                out_array.push({ name: 'param'+(++index), expr: convert2vxml(out_variables[i]) })
+            }
+
+            var json = { response: {
+                variables: { var: out_array },
+                error: { code: 0, description: '' }
+            }};
 
             xml = '<?xml version="1.0"?>' + xml2js.toXml(json);
 
         } catch (e) {
-            // catch exception, return as error
+            // catch exception, return as '5' user-defined error
             xml = '<?xml version="1.0"?>'
                 + '<response>'
-                + '<variables>'
-                + '</variables>'
-                + '<error code="-1" description="' + e.message + '"/>'
+                + '<variables></variables>'
+                + '<error code="5" description="' + convert2vxml(e.message) + '"/>'
                 + '</response>';
         }
 
         res.setHeader('Content-Type', 'text/xml');
         res.send(xml);
+    }
+
+    /**
+     * Escapes special characters in expression values
+     * to VXML format
+     *
+     * @param val
+     */
+    function convert2vxml(val) {
+        if (val != null && typeof val == 'string') {
+            return val.replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, '\\&apos;')
+                .replace(/"/g, '\\&quot;')
+                .replace(/\x08/g, '\\b')
+                .replace(/\x09/g, '\\t')
+                .replace(/\x0a/g, '\\n')
+                .replace(/\x0b/g, '\\v')
+                .replace(/\x0c/g, '\\f')
+                .replace(/\x0d/g, '\\r');
+        }
+        return val;
     }
 
     /**
@@ -168,7 +189,6 @@ var AppClass = function() {
         }
     };
 
-
     /**
      *  Initializes the sample application.
      */
@@ -181,7 +201,6 @@ var AppClass = function() {
         self.initializeServer();
     };
 
-
     /**
      *  Start the server (starts up the sample application).
      */
@@ -192,13 +211,12 @@ var AppClass = function() {
                         new Date(Date.now() ), self.ipaddress, self.port);
         });
     };
-
 };
 
 /**
  *  main():  Main code.
  */
-var mainapp = new AppClass();
-mainapp.initialize();
-mainapp.start();
+var ivrquery = new IvrQueryServer();
+ivrquery.initialize();
+ivrquery.start();
 
