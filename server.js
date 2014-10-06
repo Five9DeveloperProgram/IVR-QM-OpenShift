@@ -69,7 +69,7 @@ var IvrQueryServer = function() {
         // Removed 'SIGPIPE' from the list - bugz 852598.
         ['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT',
          'SIGBUS', 'SIGFPE', 'SIGUSR1', 'SIGSEGV', 'SIGUSR2', 'SIGTERM'
-        ].forEach(function(element, index, array) {
+        ].forEach(function(element) { //, index, array) {
             process.on(element, function() { self.terminator(element); });
         });
     };
@@ -117,6 +117,10 @@ var IvrQueryServer = function() {
             }
 
             // Begin module processing
+
+            for (var h in req.headers) {
+                console.log('header: ' + h + '=' + req.headers[h]);
+            }
 
             /*
                 Parse input parameters passed in as param1, param2, param3, etc.
