@@ -118,10 +118,6 @@ var IvrQueryServer = function() {
 
             // Begin module processing
 
-            for (var h in req.headers) {
-                console.log('header: ' + h + '=' + req.headers[h]);
-            }
-
             /*
                 Parse input parameters passed in as param1, param2, param3, etc.
              */
