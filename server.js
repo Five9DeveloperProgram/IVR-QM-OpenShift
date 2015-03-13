@@ -188,6 +188,8 @@ var IvrQueryServer = function() {
 
             // End module processing
 
+            // Use XML2JS to return XML formatted in standard Five9 Query Module format
+
             var index = 0;
             var out_array = [];
             for (var i in out_variables) {
