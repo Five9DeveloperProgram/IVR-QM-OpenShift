@@ -1,19 +1,19 @@
 {
-  "name": "OpenShift-Sample-App",
+  "name": "Five9-IVR-Query-App",
   "version": "1.0.0",
-  "description": "OpenShift Sample Application",
+  "description": "Five9 IVR Query Application",
   "keywords": [
-    "OpenShift",
+    "Five9",
     "Node.js",
     "application",
     "openshift"
   ],
   "author": {
-    "name": "OpenShift",
-    "email": "ramr@example.org",
-    "url": "http://www.openshift.com/"
+    "name": "Five9",
+    "email": "support@five9.com",
+    "url": "http://www.five9.com/"
   },
-  "homepage": "http://www.openshift.com/",
+  "homepage": "http://www.five9.com/",
   "repository": {
     "type": "git",
     "url": "https://github.com/openshift/origin-server"
